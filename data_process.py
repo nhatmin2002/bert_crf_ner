@@ -20,29 +20,32 @@ class DataProcessor(object):
         raise NotImplementedError
 
     @classmethod
-    def _read_text(self, input_file):
+    def _read_text(self, input_file, delim='\t', word_idx=0, label_idx=-1):
+        tokens, labels = [], []
+        tmp_tok, tmp_lab = [], []
+        label_set = []
         lines = []
-        with open(input_file, "r", encoding="utf8") as f:
-            words = []
-            labels = []
-            for line in f:
-                if line.startswith("-DOCSTART-") or line == "" or line == "\n":
-                    if words:
-                        lines.append({"words": words, "labels": labels})
-                        words = []
-                        labels = []
+        
+        with open(input_file, 'r', encoding='utf8') as reader:
+            for line in reader:
+                if "IMGID" in line: 
+                    a=1
+                else:
+                    line = line.strip()
+                    cols = line.split(delim)
+                    if len(cols) < 2:
+                        if len(tmp_tok) > 0:
+                            tokens.append(tmp_tok)
+                            labels.append(tmp_lab)
+                            lines.append({"words": tmp_tok, "labels": tmp_lab})
+                        tmp_tok = []
+                        tmp_lab = []
                     else:
-                        splits = line.split(" ")
-                        words.append(splits[0])
-                        if len(splits) > 1:
-                            labels.append(splits[-1].replace("\n", ""))
-                        else:
-                            labels.append("O")
-            if words:
-                lines.append({"words": words, "labels": labels})
-        # print(lines[0])
-        # {'words': ['高', '勇', ':', '男', ',', '中', '国'],
-        #  'labels':['B-NAME', 'E-NAME', 'O', '0', O', 'O', 'O']}
+                        tmp_tok.append(cols[word_idx])
+                        tmp_lab.append(cols[label_idx])
+                        label_set.append(cols[label_idx])
+        print(lines[0])
+        
         return lines
 
 
@@ -84,7 +87,7 @@ def collate_fn(batch):
     all_input_ids, all_attention_mask, all_token_type_ids, all_lens, all_labels = map(
         torch.stack, zip(*batch)
     )
-    max_len = torch.max(all_len).item()
+    max_len = torch.max(all_lens).item()
     all_input_ids = all_input_ids[:, :max_len]
     all_attention_mask = all_attention_mask[:, :max_len]
     all_token_type_ids = all_token_type_ids[:, :max_len]
@@ -155,44 +158,27 @@ def convert_example_to_features(
 class CnerProcessor(DataProcessor):
     def get_train_examples(self, data_dir):
         return self._create_examples(
-            self._read_text(os.path.join(data_dir, "train.char.bmes")), "train"
+            self._read_text(os.path.join(data_dir, "train.txt")), "train"
         )
 
     def get_dev_examples(self, data_dir):
         return self._create_examples(
-            self._read_text(os.path.join(data_dir, "dev.char.bmes")), "dev"
+            self._read_text(os.path.join(data_dir, "dev.txt")), "dev"
         )
 
     def get_test_examples(self, data_dir):
         return self._create_examples(
-            self._read_text(os.path.join(data_dir, "test.char.bmes")), "test"
+            self._read_text(os.path.join(data_dir, "test.txt")), "test"
         )
 
     def get_labels(self):
         return [
-            "X",
-            "B-CONT",
-            "B-EDU",
-            "B-LOC",
-            "B-NAME",
-            "B-ORG",
-            "B-PRO",
-            "B-RACE",
-            "B-TITLE",
-            "I-CONT",
-            "I-EDU",
-            "I-LOC",
-            "I-NAME",
-            "I-ORG",
-            "I-PRO",
-            "I-RACE",
-            "I-TITLE",
-            "O",
-            "S-NAME",
-            "S-ORG",
-            "S-RACE",
-            "[START]",
-            "[END]",
+            'X',
+'O', 'B-QUANTITY-CUR', 'I-QUANTITY-CUR', 'B-PERSON', 'B-LOCATION-GPE', 'I-LOCATION-GPE', 'B-ORGANIZATION', 'B-QUANTITY-DIM', 'I-QUANTITY-DIM', 'B-QUANTITY-PER', 'I-QUANTITY-PER', 'B-DATETIME', 'I-DATETIME', 'I-ORGANIZATION', 'I-PERSON', 'B-QUANTITY-NUM', 'B-QUANTITY', 'I-QUANTITY', 'B-PERSONTYPE', 'B-DATETIME-DATE', 'I-DATETIME-DATE', 'B-QUANTITY-ORD', 'I-QUANTITY-ORD', 'B-DATETIME-DURATION', 'I-DATETIME-DURATION', 'I-PERSONTYPE', 'B-EVENT', 'I-EVENT', 'B-PRODUCT', 'I-PRODUCT', 'B-PRODUCT-AWARD', 'I-PRODUCT-AWARD', 'B-DATETIME-DATERANGE', 'I-DATETIME-DATERANGE', 'B-QUANTITY-AGE', 'I-QUANTITY-AGE', 'B-PRODUCT-COM', 'I-PRODUCT-COM', 'B-PRODUCT-LEGAL', 'I-PRODUCT-LEGAL', 'B-LOCATION', 'I-QUANTITY-NUM', 'B-ORGANIZATION-SPORTS', 'I-ORGANIZATION-SPORTS', 'B-ORGANIZATION-STOCK', 'B-EVENT-SPORT', 'I-EVENT-SPORT', 'B-DATETIME-TIME', 'I-DATETIME-TIME', 'B-LOCATION-STRUC', 'I-LOCATION-STRUC', 'B-DATETIME-SET', 'I-DATETIME-SET', 'B-LOCATION-GEO', 'I-LOCATION-GEO', 'B-DATETIME-TIMERANGE', 'I-DATETIME-TIMERANGE', 'B-EVENT-CUL', 'B-QUANTITY-TEM', 'I-QUANTITY-TEM', 'I-LOCATION', 'B-ADDRESS', 'I-ADDRESS', 'B-ORGANIZATION-MED', 'I-ORGANIZATION-MED', 'B-PHONENUMBER', 'I-EVENT-CUL', 'B-EVENT-GAMESHOW', 'I-EVENT-GAMESHOW', 'B-EVENT-NATURAL', 'I-EVENT-NATURAL', 'B-URL', 'I-PHONENUMBER', 'B-EMAIL', 'I-EMAIL', 'I-ORGANIZATION-STOCK', 'A', 'B', 'B-IP', 'B-SKILL', 'I-URL',
+            'I-SKILL',
+
+            '[START]',
+            '[END]',
         ]
 
     def _create_examples(self, lines, set_type):
