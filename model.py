@@ -12,8 +12,8 @@ class BertCrfForNer(nn.Module):
     def __init__(self, num_labels):
         super(BertCrfForNer, self).__init__()
         # bert模型
-        self.config = BertConfig.from_pretrained('./bert_pretrain/bert_config.json')
-        self.bert = BertModel.from_pretrained('./bert_pretrain/pytorch_model.bin', config=self.config)
+        self.config = BertConfig.from_pretrained('vinai/phobert-base')
+        self.bert = BertModel.from_pretrained('vinai/phobert-base', config=self.config)
 
         # 每个token进行分类
         self.dropout = nn.Dropout(self.config.hidden_dropout_prob)
