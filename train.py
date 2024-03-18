@@ -143,7 +143,7 @@ if __name__ == "__main__":
     args.label2id = {label: i for i, label in enumerate(label_list)}
     num_labels = len(label_list)
 
-    tokenizer = BertTokenizer.from_pretrained('./bert_pretrain/vocab.txt')
+    tokenizer = BertTokenizer.from_pretrained('vinai/phobert-base')
 
     # 实例化模型
     model = BertCrfForNer(num_labels)
