@@ -99,11 +99,8 @@ if __name__ == '__main__':
 
     num_labels = len(label_list)
     # s = '常建良，男，1963年出生，工科学士，高级工程师，北京物资学院客座副教授。'
-    s = ['1', '9', '6', '6', '年', '出', '生', '，', '汉', '族', '，', '中', '共', '党', '员', '，', '本', '科', '学',
-         '历', '，', '工', '程', '师', '、', '美', '国', '项', '目', '管', '理', '协', '会', '注', '册', '会', '员', '（',
-         'P', 'M', 'I', 'M', 'e', 'm', 'b', 'e', 'r', '）', '、', '注', '册', '项', '目', '管', '理', '专', '家', '（',
-         'P', 'M', 'P', '）', '、', '项', '目', '经', '理', '。']
-    tokenizer = BertTokenizer.from_pretrained('./bert_pretrain/vocab.txt')
+    s = ['Biển', 'rác', 'sau', 'lễ_hội', 'ở_Anh']
+    tokenizer = BertTokenizer.from_pretrained('vinai/phobert-base')
     tokens, input_ids, input_mask, segment_ids, input_len = convert_examples_to_features(s, tokenizer)
 
     model = BertCrfForNer(num_labels)
