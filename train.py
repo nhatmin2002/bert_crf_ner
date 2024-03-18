@@ -17,7 +17,7 @@ from data_process import CnerProcessor as Processor
 from metrics import SeqEntityScore
 from model import BertCrfForNer
 from transformers import BertTokenizer
-from data_process import convert_examples_to_features
+from data_process import convert_example_to_features
 from data_process import collate_fn, get_entities
 from config import get_argparse
 
@@ -46,7 +46,7 @@ def load_and_cache_examples(args, tokenizer, data_type='train'):
         else:
             examples = processor.get_test_examples(args.data_dir)
 
-        features = convert_examples_to_features(examples=examples,
+        features = convert_example_to_features(examples=examples,
                                                 tokenizer=tokenizer,
                                                 label_list=label_list,
                                                 max_seq_length=args.max_seq_length,
